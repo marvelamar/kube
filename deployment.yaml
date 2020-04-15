@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jbossdeploy
+  labels:
+    colour: orange
+spec:
+  replicas: 2
+  template:
+    metadata:
+      name: jboss
+      labels:
+        colour: orange
+    spec:
+      containers:
+        - name: jbossdeploy
+          image: jboss/wildfly
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: mgmt
+              containerPort: 9990
+          command: ["/bin/sh", "-c"]
+          args: ["/opt/jboss/wildfly/bin/add-user.sh admin Admin#70365 --silent; /opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagement 0.0.0.0"]
+  selector:
+    matchLabels:
+      colour: orange
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jbossserv
+  labels:
+    colour: orange
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+    - name: mgmt
+      port: 9990
+      targetPort: 9990
+  selector:
+    colour: orange
